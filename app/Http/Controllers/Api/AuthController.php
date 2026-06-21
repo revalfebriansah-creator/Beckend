@@ -27,6 +27,7 @@ class AuthController extends Controller
             'message' => 'Registrasi berhasil!',
             'user' => $user
         ]);
+
     }
     public function login(Request $request)
     {
@@ -53,4 +54,14 @@ class AuthController extends Controller
             'message' => 'Email atau password salah'
         ], 401);
     }
+
+    public function logout(Request $request)
+{
+    // Jika menggunakan Laravel Sanctum untuk autentikasi token:
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json([
+        'message' => 'Logout berhasil'
+    ]);
+}
 }
