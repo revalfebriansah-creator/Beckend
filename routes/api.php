@@ -3,9 +3,9 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// Endpoint Registrasi dan Login (Umum)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -20,6 +20,11 @@ Route::get('/login', function () {
 // Route Group untuk user yang sudah login (Umum)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    
+    // Endpoint Profile
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
 
 // Route Group khusus Admin (dilindungi auth:sanctum dan admin middleware)
