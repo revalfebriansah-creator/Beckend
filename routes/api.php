@@ -61,4 +61,5 @@ Route::middleware(['auth:sanctum', 'admin'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus']);
     });
