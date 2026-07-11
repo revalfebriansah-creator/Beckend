@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/produk', [ProdukController::class, 'index']);
+Route::get('/produk/{id}', [ProdukController::class, 'show']);
+Route::get('/kategori', [CategoryController::class, 'index']);
 
 // Endpoint fallback when user is not authenticated
 Route::get('/login', function () {
@@ -28,6 +31,14 @@ Route::get('/login', function () {
 // Authenticated Routes (Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    
+    // Category Endpoints (Write access)
+    Route::post('/kategori', [CategoryController::class, 'store']);
+    
+    // Product Endpoints (Write access)
+    Route::post('/produk', [ProdukController::class, 'store']);
+    Route::put('/produk/{id}', [ProdukController::class, 'update']);
+    Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
     
     // Profile Endpoints
     Route::get('/profile', [ProfileController::class, 'show']);
