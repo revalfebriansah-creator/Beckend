@@ -31,14 +31,23 @@ class ProdukController extends Controller
             'harga' => 'required|integer|min:0',
             'stok' => 'required|integer|min:0',
             'detail' => 'nullable|string',
-            'gambar' => 'nullable|string'
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         if ($validator->fails()) {
             return $this->sendError('Validasi Error.', $validator->errors(), 422);
         }
 
-        $produk = Product::create($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/produk'), $filename);
+            $data['gambar'] = 'uploads/produk/' . $filename;
+        }
+
+        $produk = Product::create($data);
         return $this->sendResponse($produk, 'Produk berhasil ditambahkan.');
     }
 
@@ -73,14 +82,28 @@ class ProdukController extends Controller
             'harga' => 'sometimes|integer|min:0',
             'stok' => 'sometimes|integer|min:0',
             'detail' => 'nullable|string',
-            'gambar' => 'nullable|string'
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         if ($validator->fails()) {
             return $this->sendError('Validasi Error.', $validator->errors(), 422);
         }
 
-        $produk->update($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($produk->gambar && file_exists(public_path($produk->gambar))) {
+                unlink(public_path($produk->gambar));
+            }
+
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/produk'), $filename);
+            $data['gambar'] = 'uploads/produk/' . $filename;
+        }
+
+        $produk->update($data);
 
         return $this->sendResponse($produk, 'Produk berhasil diperbarui.');
     }
@@ -94,6 +117,10 @@ class ProdukController extends Controller
 
         if (is_null($produk)) {
             return $this->sendError('Produk tidak ditemukan.');
+        }
+
+        if ($produk->gambar && file_exists(public_path($produk->gambar))) {
+            unlink(public_path($produk->gambar));
         }
 
         $produk->delete();
