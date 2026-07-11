@@ -19,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/kategori', [CategoryController::class, 'index']);
+Route::get('/kategori/{id}', [CategoryController::class, 'show']);
 
 // Endpoint fallback when user is not authenticated
 Route::get('/login', function () {
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Category Endpoints (Write access)
     Route::post('/kategori', [CategoryController::class, 'store']);
+    Route::put('/kategori/{id}', [CategoryController::class, 'update']);
+    Route::delete('/kategori/{id}', [CategoryController::class, 'destroy']);
     
     // Product Endpoints (Write access)
     Route::post('/produk', [ProdukController::class, 'store']);
