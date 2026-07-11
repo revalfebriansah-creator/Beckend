@@ -51,4 +51,12 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    /**
+     * Relasi ke Order (Pesanan).
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
