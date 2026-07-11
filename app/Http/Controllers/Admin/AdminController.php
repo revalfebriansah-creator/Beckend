@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     /**
-     * Dashboard Admin
+     * Dashboard Admin.
+     *
+     * @return JsonResponse
      */
-    public function dashboard()
+    public function dashboard(): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Selamat datang di Admin Panel!',
-            'data' => [
-                'user' => auth()->user()
-            ]
-        ], 200);
+        return $this->sendResponse([
+            'user' => auth()->user()
+        ], 'Selamat datang di Admin Panel!');
     }
 }

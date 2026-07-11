@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -11,95 +12,85 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     /**
-     * Registrasi User Baru
+     * Registrasi User Baru.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->sendError('Validasi gagal', $validator->errors(), 422);
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password, // Laravel 11/12 meng-hash secara otomatis jika menggunakan casts pada model
-            'role' => 'customer',
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => $request->password, // Otomatis ter-hash oleh cast di model User
+            'role'     => 'customer',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Registrasi berhasil',
-            'data' => $user,
+        return $this->sendResponse([
+            'user'         => $user,
             'access_token' => $token,
-            'token_type' => 'Bearer'
-        ], 201);
+            'token_type'   => 'Bearer'
+        ], 'Registrasi berhasil', 201);
     }
 
     /**
-     * Login User
+     * Login User.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->sendError('Validasi gagal', $validator->errors(), 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Email atau password salah'
-            ], 401);
+            return $this->sendError('Email atau password salah', [], 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login berhasil',
+        return $this->sendResponse([
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
+            'token_type'   => 'Bearer',
+            'user'         => [
+                'id'    => $user->id,
+                'name'  => $user->name,
                 'email' => $user->email,
             ]
-        ], 200);
+        ], 'Login berhasil');
     }
 
     /**
-     * Logout User (Hapus Token)
+     * Logout User (Hapus Token).
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        // Menghapus token aktif yang digunakan saat ini
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout berhasil'
-        ], 200);
+        return $this->sendResponse(null, 'Logout berhasil');
     }
 }
